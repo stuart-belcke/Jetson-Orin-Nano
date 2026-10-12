@@ -1,0 +1,12 @@
+# SSH shortcut for the Jetson, so `ssh orin` works from the PC.
+#
+# Copy this block into your SSH config (no file extension):
+#   Windows: C:\Users\<you>\.ssh\config
+#   macOS/Linux: ~/.ssh/config
+#
+# ADD it to the file; don't replace the whole file, or you'll lose any
+# existing entries (for example GitHub keys).
+
+Host orin
+    HostName stuart-orin.local
+    User stuart

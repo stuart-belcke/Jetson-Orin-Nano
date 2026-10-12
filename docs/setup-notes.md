@@ -64,7 +64,7 @@ A 64 GB SanDisk microSD card was bought for the firmware path but wasn't needed.
 Always include the username: plain `ssh stuart-orin.local` tries the Windows username `sbelc` and fails with "Permission denied."
 
 - **From the PC:** `ssh stuart@stuart-orin.local`. If the name doesn't resolve, use the IP from `hostname -I`.
-- **Shortcut:** the file `C:\Users\<you>\.ssh\config` (no `.txt` extension) holds:
+- **Shortcut:** the file `C:\Users\<you>\.ssh\config` (no `.txt` extension) holds the block below. Add it to the file rather than replacing the file, so existing entries (like GitHub keys) survive:
 
 ```
 Host orin
