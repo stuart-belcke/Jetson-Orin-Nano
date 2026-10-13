@@ -19,13 +19,14 @@ The Jetson runs headless (no desktop) and is reached over SSH from the Windows P
 | AI runtime | Ollama, API at `127.0.0.1:11434` |
 | Web chat | Open WebUI at `http://stuart-orin.local:8080` |
 | Swap | 8 GB `/swapfile`, swappiness 10 |
+| Updates | Ubuntu security updates automatic daily; NVIDIA packages manual |
 
 Most-used commands:
 
 - `sudo nvpmodel -q` — show current power mode
 - `ollama list` / `ollama run qwen3:8b` / `ollama ps` — list models, chat, check GPU use
 - `lsblk` — confirm `/` is on `nvme0n1`
-- `sudo apt update && sudo apt upgrade -y` — install updates
+- `sudo apt update && sudo apt upgrade -y` — install all updates, including NVIDIA's (monthly; security updates are automatic)
 - `sudo shutdown now` — power off cleanly before unplugging
 
 ## Hardware
@@ -152,6 +153,23 @@ echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf && sudo sysc
 ```
 
 - **Remove:** `sudo swapoff /swapfile && sudo rm /swapfile`, delete the `/swapfile` line from `/etc/fstab`, and delete `/etc/sysctl.d/99-swappiness.conf`.
+
+## Updates
+
+Automatic security updates were turned on Oct 11, 2026 with `unattended-upgrades`. They install daily from Ubuntu's security sources only and never reboot on their own. NVIDIA's packages (kernel, bootloader, firmware, CUDA from `repo.download.nvidia.com`) are deliberately left manual, because an interrupted or unattended firmware update can stop the board booting.
+
+- **Setup commands:**
+
+```
+sudo apt update && sudo apt install -y unattended-upgrades
+printf 'APT::Periodic::Update-Package-Lists "1";\nAPT::Periodic::Unattended-Upgrade "1";\n' | sudo tee /etc/apt/apt.conf.d/20auto-upgrades
+```
+
+- **Check what it would do:** `sudo unattended-upgrade --dry-run --debug 2>&1 | grep -E "Allowed origins|Packages that will be upgraded"`. Allowed origins should list only Ubuntu / UbuntuESM, never `nvidia`.
+- **Log:** `/var/log/unattended-upgrades/`.
+- **Monthly, by hand:** `sudo apt update && sudo apt upgrade -y` for NVIDIA and other updates. Reboot if `/var/run/reboot-required` exists. Don't power off during it.
+- **Not handled by apt:** Ollama (rerun its install script) and Open WebUI (`docker pull`, see Open WebUI above).
+- **Turn off:** set both values in `/etc/apt/apt.conf.d/20auto-upgrades` to `"0"`.
 
 ## Reinstalling from scratch
 
